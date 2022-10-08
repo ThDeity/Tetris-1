@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using DG.Tweening;
+﻿using DG.Tweening;
 using UnityEngine;
 
-public static class Vector3Extension {
-    public static Vector2 Round(this Vector3 v) {
+public static class Vector3Extension 
+{
+    public static Vector2 Round(this Vector3 v) 
+    {
         int x = Mathf.RoundToInt(v.x);
         int y = Mathf.RoundToInt(v.y);
         return new Vector2(x, y);
@@ -12,10 +12,8 @@ public static class Vector3Extension {
 }
 
 
-public class Model : MonoBehaviour {
-    /// <summary>
-    /// 升级的分数间隔, 每个scoreStep升级一次
-    /// </summary>
+public class Model : MonoBehaviour 
+{
     public int scoreStep = 5000;
     public const int kNormalRows = 20;
     public const int kMaxRows = 22;
@@ -31,15 +29,16 @@ public class Model : MonoBehaviour {
     private int HighScore { get; set; }
 
 
-    public bool IsShapePositionValid(Transform shapeTransform) {
-        foreach (Transform childTransform in shapeTransform) {
-            if (childTransform.CompareTag("Block")) {
+    public bool IsShapePositionValid(Transform shapeTransform) 
+    {
+        foreach (Transform childTransform in shapeTransform) 
+        {
+            if (childTransform.CompareTag("Block"))
+            {
                 Vector2 position = childTransform.position.Round();
-                //地图边界
                 if (IsInsideMap(position) == false) {
                     return false;
                 }
-                //其它shape
                 if (mMap[(int)position.x, (int)position.y] != null) {
                     return false;
                 }
@@ -48,8 +47,10 @@ public class Model : MonoBehaviour {
         return true;
     }
 
-    public void PlaceShape(Transform shapeTransform) {
-        foreach (Transform childTransform in shapeTransform) {
+    public void PlaceShape(Transform shapeTransform) 
+    {
+        foreach (Transform childTransform in shapeTransform) 
+        {
             if (childTransform.CompareTag("Block")) {
                 Vector2 position = childTransform.position.Round();
                 mMap[(int)position.x, (int)position.y] = childTransform;
@@ -58,8 +59,9 @@ public class Model : MonoBehaviour {
         CheckMap();
     }
 
-    public void CheckMap() {
-        int count = 0;//计算行数和分数
+    public void CheckMap()
+    {
+        int count = 0;
         int firstRowIndex = -1;
         for (int i = 0; i < kMaxRows; i++) {
             bool isFull = CheckIsRowFull(i);
@@ -71,25 +73,24 @@ public class Model : MonoBehaviour {
                 }
                 AudioManager.Instance.PlayLineClear();
             }
-            //如果到最后一行
-            if (i == (kMaxRows - 1)) {
-                //如果有行消除
-                if (firstRowIndex != -1) {
-                    //暂停游戏, 阻止方块下落
+
+            if (i == (kMaxRows - 1)) 
+            {
+                if (firstRowIndex != -1) 
+                {
                     GameManager.Instance.PauseGame();
                     ClearOneRow(firstRowIndex, count);
                 }
             }
         }
         UpdateScore(count);
-        if (count > 0) {
+        if (count > 0)
             UpdateLevel();
-        }
         EventManager.Instance.Fire(UIEvent.REFRESH_SCORE, 0);
     }
 
-    public bool IsGameOver() {
-        //如果最上面一行有方块
+    public bool IsGameOver() 
+    {
         for (int i = 0; i < kMaxColumns; i++) {
             if (mMap[i, kMaxRows - 2] != null) {
                 SaveData();
@@ -99,8 +100,8 @@ public class Model : MonoBehaviour {
         return false;
     }
 
-    public int[] GetScoreInfo() {
-        //todo 可以改成josn格式??
+    public int[] GetScoreInfo() 
+    {
         return new[] { HighScore, Score, Row, Level };
     }
 
@@ -113,8 +114,8 @@ public class Model : MonoBehaviour {
         SaveData();
     }
 
-    public void RefreshGame() {
-        //map and data
+    public void RefreshGame() 
+    {
         mMap = new Transform[kMaxColumns, kMaxRows];
         GameManager.Instance.RestartGame();
         Score = 0;
@@ -132,19 +133,18 @@ public class Model : MonoBehaviour {
     }
 
     private bool CheckIsRowFull(int rowIndex) {
-        for (int i = 0; i < kMaxColumns; i++) {
-            if (mMap[i, rowIndex] == null) {
+        for (int i = 0; i < kMaxColumns; i++)
+        {
+            if (mMap[i, rowIndex] == null)
                 return false;
-            }
         }
         return true;
     }
 
-    private bool IsInsideMap(Vector2 position) {
-        return position.x >= 0 && position.x < kMaxColumns && position.y >= 0;
-    }
+    private bool IsInsideMap(Vector2 position) { return position.x >= 0 && position.x < kMaxColumns && position.y >= 0; }
 
-    private void UpdateScore(int count) {
+    private void UpdateScore(int count) 
+    {
         if (count == 0) {
             Score += 20;
         }
@@ -156,7 +156,8 @@ public class Model : MonoBehaviour {
         }
     }
 
-    private void UpdateLevel() {
+    private void UpdateLevel() 
+    {
         var tempLevel = Score / scoreStep;
         if (tempLevel > Level) {
             Level = tempLevel;
@@ -164,10 +165,10 @@ public class Model : MonoBehaviour {
         }
     }
 
-    private void ClearOneRow(int firstRowIndex, int count) {
+    private void ClearOneRow(int firstRowIndex, int count) 
+    {
         for (int j = 0; j < count; j++) {
             var j1 = j;
-            //行消除动画
             mMapMask[firstRowIndex + j].DOFade(1, 0.2f)
                 .SetLoops(4)
                 .SetEase(Ease.Linear)
@@ -185,12 +186,10 @@ public class Model : MonoBehaviour {
                 });
         }
     }
-    /// <summary>
-    /// 剩下的方块往下挪
-    /// </summary>
     /// <param name="lineIndex"></param>
     /// <param name="count"></param>
-    private void MoveLines(int lineIndex, int count) {
+    private void MoveLines(int lineIndex, int count) 
+    {
         for (int i = lineIndex + count; i < kNormalRows; i++) {
             for (int j = 0; j < kMaxColumns; j++) {
                 if (mMap[j, i] == null) {
@@ -203,7 +202,8 @@ public class Model : MonoBehaviour {
         }
     }
 
-    private void LoadData() {
+    private void LoadData() 
+    {
         HighScore = PlayerPrefs.GetInt("HighestScore", 0);
     }
 

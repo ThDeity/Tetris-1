@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using DG.Tweening;
+﻿using DG.Tweening;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
-public class Controller : Singleton<Controller> {
+public class Controller : Singleton<Controller> 
+{
     //also used in other class
     [HideInInspector]
     public Model model;
@@ -42,7 +40,6 @@ public class Controller : Singleton<Controller> {
 
     private void ShowDifficultyPanel(object obj) {
         view.ShowDifficultyPanel();
-
     }
 
     private void ShowDefinedButtonPanel(object obj) {
